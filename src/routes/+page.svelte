@@ -26,9 +26,11 @@
   }
   :global(:root) {
     --accent: #a7db75;
+    --accentoff: #a7db7544;
     --bg: #111;
     --fg: #eee;
     --border: 3px solid var(--accent);
+    --borderoff: 3px solid var(--accentoff);
   }
   :global(body) {
     margin: 0;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { RuleBody } from "./pebble.svelte";
+  import {  type RuleBody } from "$lib/pebble.svelte";
 
   type Props = { pebbles: number; body: RuleBody };
 
@@ -88,22 +88,22 @@
   input:nth-of-type(1) {
     grid-column: 2/3;
     grid-row: 1/3;
-    border-bottom: none;
-  }
-  input:nth-of-type(2) {
-    grid-column: 2/4;
-    grid-row: 3/5;
     border-right: none;
   }
-  input:nth-of-type(3) {
+  input:nth-of-type(2) {
     grid-column: 3/4;
     grid-row: 1/3;
-    border-left: none;
+    border-bottom: none;
+  }
+  input:nth-of-type(3) {
+    grid-column: 2/4;
+    grid-row: 3/5;
+    border-top: none;
   }
   input:nth-of-type(4) {
     grid-column: 3/4;
     grid-row: 3/5;
-    border-top: none;
+    border-left: none;
   }
   div div {
     grid-column: 1/2;

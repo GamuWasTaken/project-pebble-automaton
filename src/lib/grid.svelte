@@ -3,11 +3,12 @@
     type PebbleAutomaton,
     type Coord,
     GridAppearance,
-  } from "./pebble.svelte";
+  } from "$lib/pebble.svelte";
 
   type Props = { automaton: PebbleAutomaton; selected: Coord };
 
   let { automaton, selected = $bindable() }: Props = $props();
+  let [sx, sy] = $derived([selected[0], selected[1]])
   let grid = $derived(Array.from({ length: automaton.size }, (_, i) => i));
   // TODO maybe change the color of the grid based on number of rules and pebbles?
 </script>
@@ -18,11 +19,12 @@
       {@const pebbles = automaton.grid[x][y]}
 
       <button
+        class={(sx == x && sy == y ? 'selected' : '')}
         onclick={(_) => {
           selected = [x, y];
         }}
       >
-        {#if automaton.appearance == GridAppearance.Dots && pebbles <= 16}
+        {#if automaton.appearance == GridAppearance.Dots && pebbles <= 16 && pebbles != 0}
           {#each Array.from({ length: pebbles }) as _}
             <div class="dot"></div>
           {/each}
@@ -44,14 +46,18 @@
     grid-template-columns: repeat(var(--size), 1fr);
     grid-template-rows: repeat(var(--size), 1fr);
   }
+
   button {
     color: var(--fg);
     background-color: var(--bg);
-    border: 3px solid var(--accent);
+    border: var(--borderoff);
     border-radius: 5px;
     padding: 0;
 
     font-size: 2cqmax;
+  }
+  button.selected {
+    border: var(--border);
   }
 
   button:has(.dot) {

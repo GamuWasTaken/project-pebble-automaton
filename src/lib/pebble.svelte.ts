@@ -79,7 +79,7 @@ export class PebbleAutomaton {
         const [l, u, d, r] = rule[pebbles]
         const total = l + u + d + r
 
-        if(total == 0) continue
+        if (total == 0) continue
 
         if (total > pebbles) {
           alert(`Grid ${x},${y} cannot apply rule ${pebbles} as it requires ${total} pebbles (${pebbles} < ${total})`)

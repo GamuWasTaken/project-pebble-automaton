@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type PebbleAutomaton, GridAppearance } from "./pebble.svelte";
+  import { type PebbleAutomaton, GridAppearance } from "$lib/pebble.svelte";
 
   type Props = { automaton: PebbleAutomaton };
 
