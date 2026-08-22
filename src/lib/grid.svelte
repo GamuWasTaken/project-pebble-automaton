@@ -1,16 +1,12 @@
 <script lang="ts">
-  import {
-    type PebbleAutomaton,
-    type Coord,
-    GridAppearance,
-  } from "$lib/pebble.svelte";
+  import { type Pebble, type Coord } from "$lib/pebble.svelte";
 
-  type Props = { automaton: PebbleAutomaton; selected: Coord };
+  type Props = { automaton: Pebble; selected: Coord };
 
   let { automaton, selected = $bindable() }: Props = $props();
-  let [sx, sy] = $derived([selected[0], selected[1]])
+  let [sx, sy] = $derived([selected[0], selected[1]]);
+
   let grid = $derived(Array.from({ length: automaton.size }, (_, i) => i));
-  // TODO maybe change the color of the grid based on number of rules and pebbles?
 </script>
 
 <section style:--size={automaton.size}>
@@ -19,14 +15,14 @@
       {@const pebbles = automaton.grid[x][y]}
 
       <button
-        class={(sx == x && sy == y ? 'selected' : '')}
+        class={sx == x && sy == y ? "selected" : ""}
         onclick={(_) => {
           selected = [x, y];
         }}
       >
-        {#if automaton.appearance == GridAppearance.Dots && pebbles <= 16 && pebbles != 0}
+        {#if pebbles <= 16 && pebbles != 0}
           {#each Array.from({ length: pebbles }) as _}
-            <div class="dot"></div>
+            <div></div>
           {/each}
         {:else}
           {automaton.grid[x][y]}
@@ -38,7 +34,7 @@
 
 <style>
   section {
-    height: min(80%, 70vh);
+    width: 70cqmin;
     aspect-ratio: 1/1;
 
     display: grid;
@@ -54,23 +50,23 @@
     border-radius: 5px;
     padding: 0;
 
-    font-size: 2cqmax;
+    font-size: 100%;
   }
   button.selected {
     border: var(--border);
   }
 
-  button:has(.dot) {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    justify-items: center;
+  button:has(div) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     padding: 5px;
     gap: 5px;
   }
 
-  .dot {
+  div {
+    --todo: "make the dots adapt to container size";
     background-color: var(--accent);
     width: 10px;
     height: 10px;

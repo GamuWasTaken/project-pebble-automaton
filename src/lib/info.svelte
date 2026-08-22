@@ -1,38 +1,48 @@
 <script lang="ts">
-  import {
-    type PebbleAutomaton,
-    type Coord,
-  } from "$lib/pebble.svelte";
+  import { type Pebble, type Coord, type Rule, clamp } from "$lib/pebble.svelte";
   import RuleDisplay from "$lib/rule.svelte";
 
-  type Props = { automaton: PebbleAutomaton; selected: Coord };
+  type Props = {
+    automaton: Pebble;
+    selected: Coord;
+    onpebblechange: (n: number) => void;
+    onrulechange: (i: number, r: Rule) => void;
+  };
 
-  let { automaton = $bindable(), selected }: Props = $props();
+  let { automaton, selected, onrulechange, onpebblechange }: Props = $props();
   let [x, y] = $derived(selected);
 
   let rules = $derived(automaton.rules[x][y]); //.filter((r) => !rule_is_empty(r)));
 </script>
 
-<section>
-  {#if x < automaton.size && y < automaton.size}
-    {selected}
-    <input
-      type="number"
-      bind:value={automaton.grid[x][y]}
-      min="0"
-    />
+{#if x < automaton.size && y < automaton.size}
+  {selected}
+  <button
+    onclick={(_) => onpebblechange(1)}
+    oncontextmenu={(_) => onpebblechange(-1)}
 
-    <fieldset class="rules">
-      <legend>Rules</legend>
+    onwheel={(e: WheelEvent) => {
+      e.preventDefault()
+      onpebblechange(clamp(-e.deltaY, -1, 1))
+    }}
+  >
+    {automaton.grid[x][y]}
+  </button>
 
-      {#each rules as _, pebbles}
-        <RuleDisplay bind:body={automaton.rules[x][y][pebbles]} {pebbles} />
-      {/each}
-    </fieldset>
-  {:else}
-    Select a cell to see its data
-  {/if}
-</section>
+  <fieldset class="rules">
+    <legend>Rules</legend>
+
+    {#each rules as _, pebbles}
+      <RuleDisplay
+        body={automaton.rules[x][y][pebbles]}
+        {pebbles}
+        {onrulechange}
+      />
+    {/each}
+  </fieldset>
+{:else}
+  Select a cell to see its data
+{/if}
 
 <style>
   .rules {
@@ -42,15 +52,10 @@
     border: none;
     border-top: var(--border);
   }
-  input {
+  button {
     display: block;
     width: 6ch;
     text-align: center;
     padding: 5px;
-  }
-
-  section {
-    display: flex;
-    flex-direction: column;
   }
 </style>

@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { type PebbleAutomaton, GridAppearance } from "$lib/pebble.svelte";
+  type Props = {
+    onsizechange: (size: number) => void;
+    onplay: () => void;
+  };
+  let { onsizechange, onplay }: Props = $props();
 
-  type Props = { automaton: PebbleAutomaton };
-
-  let { automaton = $bindable() }: Props = $props();
+  let size_input = $state(0);
 </script>
 
 <fieldset>
@@ -14,29 +16,21 @@
     <input
       name="grid_size"
       type="range"
-      bind:value={automaton.size}
+      bind:value={size_input}
+      oninput={(_) => onsizechange(size_input)}
       min="5"
       max="10"
     />
   </div>
-
-  <div class="appearance">
-    <label for="grid_appearance">Appearance</label>
-    <select name="grid_appearance" bind:value={automaton.appearance}>
-      {#each Object.keys(GridAppearance) as option}
-        <option value={option}>{option}</option>
-      {/each}
-    </select>
-  </div>
 </fieldset>
 
 <fieldset>
-  <legend>Controls</legend>
-  <button onclick={() => automaton.step()}>></button>
+  <legend>Simulation</legend>
+  <button onclick={(_) => onplay()}>></button>
 </fieldset>
 
 <style>
-  .size, .appearance {
+  .size {
     display: flex;
     align-items: center;
     justify-items: center;

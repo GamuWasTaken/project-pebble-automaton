@@ -2,18 +2,28 @@
   import Grid from "$lib/grid.svelte";
   import CellInfo from "$lib/info.svelte";
   import Controls from "$lib/controls.svelte";
-  import { PebbleAutomaton, type Coord } from "$lib/pebble.svelte";
+  import { Pebble, type Coord } from "$lib/pebble.svelte";
 
-  let automaton = $state(new PebbleAutomaton(5));
+  let automaton = $state(new Pebble(5));
   let selected: Coord = $state([0, 0]);
 </script>
 
+<svelte:document oncontextmenu={(e) => e.preventDefault()} />
+
 <header>
-  <Controls bind:automaton />
+  <Controls
+    onplay={automaton.step}
+    onsizechange={(s) => (automaton.size = s)}
+  />
 </header>
 
 <aside>
-  <CellInfo bind:automaton {selected} />
+  <CellInfo
+    {automaton}
+    {selected}
+    onpebblechange={(p) => automaton.update_pebbles(selected, p)}
+    onrulechange={(i, r) => automaton.set_rule(selected, i, r)}
+  />
 </aside>
 
 <main>
@@ -68,5 +78,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    container: princial / inline-size;
   }
 </style>

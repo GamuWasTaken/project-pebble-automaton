@@ -1,12 +1,6 @@
 
-export enum GridAppearance {
-  Numbers = "Numbers",
-  Dots = "Dots"
-}
-
 // left, up, down, right
-export type RuleBody = [number, number, number, number]
-export type Rule = RuleBody[]
+export type Rule = [number, number, number, number]
 export type Grid<T> = T[][]
 export type Coord = [number, number]
 export type Filter = (pebbles: number) => boolean
@@ -19,7 +13,7 @@ function build_grid(s: number): Grid<number> {
   )
 }
 
-function build_rules(s: number): Grid<Rule> {
+function build_rules(s: number): Grid<Rule[]> {
   return Array.from(
     { length: s }, () => Array.from(
       { length: s }, () => Array.from(
@@ -29,47 +23,36 @@ function build_rules(s: number): Grid<Rule> {
   )
 }
 
-function copy_grid<T>(from: Grid<T>, to: Grid<T>) {
-  const min = Math.min(from.length, to.length)
-  for (let x = 0; x < min; x++) {
-    for (let y = 0; y < min; y++) {
-      to[x][y] = from[x][y]
-    }
-  }
+export function clamp(v: number, min: number, max: number): number {
+  return Math.min(Math.max(v, min), max)
 }
 
-export function rule_is_empty([l, u, d, r]: RuleBody): boolean {
-  return (l + u + d + r) == 0
+export function rule_is_empty(r: Rule): boolean {
+  return rule_sum(r) == 0
+}
+export function rule_sum([l, u, d, r]: Rule): number {
+  return (l + u + d + r)
 }
 
-export class PebbleAutomaton {
+export class Pebble {
   grid: Grid<number> = $state([])
   buffer: Grid<number> = []
-  rules: Grid<Rule> = $state([])
+  rules: Grid<Rule[]> = $state([])
 
-  #size = $state(0)
-  get size() {
-    return this.#size
-  }
-  set size(v) {
-    this.#size = v
-  }
-
-  appearance = $state(GridAppearance.Numbers)
+  size = $state(0)
 
   // history = [] // TODO
 
   constructor(s: number) {
-    this.#size = s
+    this.size = s
 
     this.grid = build_grid(10)
     this.buffer = build_grid(10)
 
     this.rules = build_rules(10)
-
   }
 
-  step() {
+  step = () => {
     for (let x = 0; x < this.size; x++) {
       for (let y = 0; y < this.size; y++) {
 
@@ -86,21 +69,16 @@ export class PebbleAutomaton {
           return
         }
 
-        { // left_cell
-          const [clamped_x, clamped_y] = [Math.max(0, x - 1), y]
-          this.buffer[clamped_x][clamped_y] = l
-        }
-        { // up_cell
-          const [clamped_x, clamped_y] = [x, Math.max(0, y - 1)]
-          this.buffer[clamped_x][clamped_y] = u
-        }
-        { // down_cell
-          const [clamped_x, clamped_y] = [x, Math.min(this.size - 1, y + 1)]
-          this.buffer[clamped_x][clamped_y] = d
-        }
-        { // right_cell
-          const [clamped_x, clamped_y] = [Math.min(this.size - 1, x + 1), y]
-          this.buffer[clamped_x][clamped_y] = r
+        const clamped = [
+          [Math.max(0, x - 1), y],
+          [x, Math.max(0, y - 1)],
+          [x, Math.min(this.size - 1, y + 1)],
+          [Math.min(this.size - 1, x + 1), y]
+        ]
+
+        for (let i = 0; i < 4; i++) {
+          const [clamped_x, clamped_y] = clamped[i]
+          this.buffer[clamped_x][clamped_y] += rule[pebbles][i]
         }
 
         this.buffer[x][y] = -total
@@ -115,18 +93,24 @@ export class PebbleAutomaton {
     }
   }
 
-  set_pebbles([x, y]: Coord, pebbles: number) {
-    this.grid[x][y] = pebbles
+  set_pebbles([x,y]: Coord, pebbles: number) {
+    this.grid[x][y] = Math.max(pebbles, 0)
   }
 
-  set_rule_constant([x, y]: Coord, pebbles: number, result: RuleBody) {
-    this.rules[x][y][pebbles] = result
+  update_pebbles([x,y]: Coord, amount: number) {
+    this.grid[x][y] = Math.max(this.grid[x][y] + amount, 0)
   }
 
-  set_rule_range([x, y]: Coord, range: Filter, result: RuleBody) {
-    for (let p = 0; p < 100; p++) {
-      if (range(p)) this.rules[x][y][p] = result
-    }
+  set_rule([x, y]: Coord, i: number, rule: Rule) {
+    // TODO validate rule?
+    this.rules[x][y][i] = rule
   }
+
+  // TODO
+  // set_rule_range([x, y]: Coord, range: Filter, result: RuleBody) {
+  //   for (let p = 0; p < 100; p++) {
+  //     if (range(p)) this.rules[x][y][p] = result
+  //   }
+  // }
 }
 
